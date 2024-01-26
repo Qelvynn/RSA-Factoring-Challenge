@@ -1,0 +1,69 @@
+#!/usr/bin/python3
+# This is a script to factorize large numbers using Pollard's rho algorithm
+import time # Import the time module to measure the execution time
+import math # Import the math module to use the gcd function
+import sys # Import the sys module to access the command-line arguments
+
+def pollard_rho(n):
+    # This is a function that implements Pollard's rho algorithm to find a non-trivial factor of n
+    if n % 2 == 0: # If n is even, return 2 as a factor
+        return 2
+    
+    x = 2 # Initialize x to 2
+    y = 2 # Initialize y to 2
+    d = 1 # Initialize d to 1
+    # Define the function f(x) using a lambda function
+    f = lambda x: (x**2 + 1) % n # This is a polynomial function modulo n
+    # Loop until a non-trivial factor is found
+    while d == 1:
+        # Generate new values for x using the function f(x)
+        x = f(x) # Update x to f(x)
+	
+        # Generate new values for y using the function f(f(y))
+        y = f(f(y)) # Update y to f(f(y))
+        # Calculate the greatest common divisor between |x - y| and n
+        d = math.gcd(abs(x - y), n) # Update d to gcd(|x - y|, n)
+    # Return the non-trivial factor
+    return d # This is a factor of n that is not 1 or n
+
+def main():
+    # This is the main function that reads the input file and prints the factors of each number
+    # Check if the correct number of command-line arguments is provided
+    if len(sys.argv) != 2:
+        # Print the correct usage of the program
+        print("Usage: python factorize.py <file>")
+        # Exit the program if the correct arguments are not provided
+        return
+    # Get the file path from the command-line argument
+    file_path = sys.argv[1] # The file path is the second argument
+    # start timing
+    start_time = time.time() # Record the start time
+    try:
+        # Open the file in read mode
+        with open(file_path, 'r') as file: # Use a context manager to handle the file
+	# Read all lines of the file into a list
+            numbers = file.readlines() # Each line is a string representing a number
+        # Iterate through each number in the list
+        for number in numbers:
+	# Convert the string number to an integer
+            num = int(number.strip()) # Strip the whitespace and convert to int
+	# Factorize the number using Pollard's rho algorithm
+            factor = pollard_rho(num) # Call the pollard_rho function on num
+            # If the factor is equal to the original number
+            if factor == num:
+                # Print that the number is prime
+                print(f"{num} is prime.") # Use an f-string to format the output
+            else:
+	    # Print the factors of the number
+                print(f"{num}={factor}*{num // factor}") # Use an f-string and integer division to format the output
+
+	if time.time() - start_time > 5: # If the execution time exceeds 5 seconds
+                print("Time limit exceeded") # Print a warning message
+                exit() # Exit the program
+
+    # Print an error message if the file is not found
+    except FileNotFoundError:
+        print(f"File '{file_path}' not found.") # Use an f-string to format the error message
+
+if __name__ == '__main__':
+    main()  # Call the main function when the script is executed
